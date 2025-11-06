@@ -1,0 +1,90 @@
+{
+  "name": "task-planner",
+  "displayName": "Task Planner",
+  "description": "Visualize PLAN*.md checklist files in sidebar",
+  "version": "0.12.1",
+  "publisher": "codr-studio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codr-studio/plan-monitor"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "plan",
+    "tasks",
+    "checklist",
+    "markdown"
+  ],
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "planMonitor",
+          "title": "Task Planner",
+          "icon": "$(checklist)"
+        }
+      ]
+    },
+    "views": {
+      "planMonitor": [
+        {
+          "type": "webview",
+          "id": "planMonitorView",
+          "name": "Tasks"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "compile": "npm run esbuild-base -- --sourcemap",
+    "watch": "npm run esbuild-base -- --sourcemap --watch",
+    "package": "TZ=UTC npx vsce@2.15.0 package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^13.0.0",
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^2.22.0",
+    "esbuild": "^0.19.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.41",
+    "markdown-it": "^14.0.0",
+    "markdown-it-task-lists": "^2.1.1"
+  },
+  "__metadata": {
+    "id": "12345678-1234-1234-1234-123456789abc",
+    "publisherId": "codr-studio-publisher-id",
+    "publisherDisplayName": "Codr Studio",
+    "installedTimestamp": 1730851200000,
+    "pinned": false,
+    "preRelease": false,
+    "source": "vsix",
+    "isPreReleaseVersion": false,
+    "hasPreReleaseVersion": false,
+    "updated": false
+  }
+}

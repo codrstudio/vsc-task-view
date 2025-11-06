@@ -1,0 +1,483 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-sideBar-background);
+  padding: 8px;
+}
+
+/* Codicons support */
+.codicon {
+  font-family: codicon;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Status icon colors */
+.status-icon.status-done {
+  color: var(--vscode-testing-iconPassed, #73C991);
+}
+
+.status-icon.status-partial {
+  color: var(--vscode-testing-iconQueued, #CCA700);
+}
+
+.status-icon.status-pending {
+  color: var(--vscode-descriptionForeground);
+}
+
+.status-icon.status-in-progress {
+  color: var(--vscode-testing-iconQueued, #CCA700);
+}
+
+.status-icon.status-blocked {
+  color: var(--vscode-testing-iconFailed, #F48771);
+}
+
+/* App container */
+#app {
+  width: 100%;
+}
+
+/* Loading state */
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Error message */
+.error {
+  padding: 12px;
+  margin: 8px 0;
+  background-color: var(--vscode-inputValidation-errorBackground);
+  color: var(--vscode-inputValidation-errorForeground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  border-radius: 4px;
+}
+
+/* Header section */
+.header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.header .title {
+  font-family: var(--vscode-font-family);
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* File selector */
+.file-selector {
+  margin-bottom: 12px;
+}
+
+.file-selector select {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 2px;
+  font-family: var(--vscode-font-family);
+  cursor: pointer;
+}
+
+.file-selector select:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+/* Statistics badges */
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stats .spacer {
+  flex: 1;
+}
+
+.stats .badge {
+  min-width: 24px;
+  height: 20px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-weight: 500;
+  cursor: help;
+  position: relative;
+}
+
+.stats .badge::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--vscode-editorHoverWidget-background);
+  color: var(--vscode-editorHoverWidget-foreground);
+  border: 1px solid var(--vscode-editorHoverWidget-border);
+  padding: 4px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1000;
+}
+
+.stats .badge:hover::after {
+  opacity: 1;
+}
+
+.stats .badge.pending {
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.stats .badge.done {
+  background-color: var(--vscode-testing-iconPassed);
+  color: var(--vscode-editor-background);
+}
+
+.stats .badge.in-progress {
+  background-color: var(--vscode-testing-iconQueued);
+  color: var(--vscode-editor-background);
+}
+
+.stats .badge.blocked {
+  background-color: var(--vscode-testing-iconFailed);
+  color: var(--vscode-editor-background);
+}
+
+/* Action buttons (expand/collapse all) */
+.stats .action-btn {
+  min-width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--vscode-button-border, transparent);
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border-radius: 3px;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.1s;
+}
+
+.stats .action-btn:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.stats .action-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--vscode-editorHoverWidget-background);
+  color: var(--vscode-editorHoverWidget-foreground);
+  border: 1px solid var(--vscode-editorHoverWidget-border);
+  padding: 4px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1000;
+  font-weight: normal;
+}
+
+.stats .action-btn:hover::after {
+  opacity: 1;
+}
+
+/* Task list */
+.task-list {
+  margin-top: 12px;
+}
+
+/* Accordion item (generic) */
+.accordion-item {
+  margin: 0;
+}
+
+/* Accordion header (clickable bar) */
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  border-left: 2px solid transparent;
+}
+
+.accordion-header:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+/* Checkbox customizado */
+.checkbox {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 1.5px solid var(--vscode-descriptionForeground);
+  border-radius: 3px;
+  display: inline-block;
+  position: relative;
+  background-color: transparent;
+}
+
+.checkbox.checked {
+  background-color: var(--vscode-testing-iconPassed, #73C991);
+  border-color: var(--vscode-testing-iconPassed, #73C991);
+}
+
+.checkbox.checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox.partial {
+  background-color: var(--vscode-testing-iconQueued, #CCA700);
+  border-color: var(--vscode-testing-iconQueued, #CCA700);
+}
+
+.checkbox.partial::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  width: 8px;
+  height: 2px;
+  background-color: white;
+}
+
+.checkbox.unchecked {
+  border-color: var(--vscode-descriptionForeground);
+  opacity: 0.6;
+}
+
+.checkbox.in-progress {
+  background-color: var(--vscode-testing-iconQueued, #CCA700);
+  border-color: var(--vscode-testing-iconQueued, #CCA700);
+}
+
+.checkbox.in-progress::after {
+  content: '−';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.checkbox.blocked {
+  background-color: var(--vscode-testing-iconFailed, #F48771);
+  border-color: var(--vscode-testing-iconFailed, #F48771);
+}
+
+.checkbox.blocked::after {
+  content: '!';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* Texto sem wrap e com ellipsis */
+.accordion-header .heading-text,
+.accordion-header .task-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron icon - aparece sempre para itens com subitens */
+.chevron {
+  min-width: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vscode-foreground);
+  transition: transform 0.2s;
+  margin-left: auto;
+  margin-right: 4px;
+}
+
+/* Link icon - aparece só no hover */
+.link-icon {
+  min-width: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: var(--vscode-descriptionForeground);
+  margin-left: auto;
+  margin-right: 4px;
+}
+
+.accordion-header:hover .link-icon {
+  opacity: 1;
+}
+
+/* Quando há chevron, o link-icon não precisa do margin-left auto (chevron já tem) */
+.accordion-header .link-icon:has(+ .chevron) {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+/* Heading styles - using accent color with varying opacity - SEM INDENTAÇÃO */
+.heading-item.h2 {
+  margin-top: 4px;
+  margin-left: 0 !important;
+}
+
+.heading-item.h2:first-child {
+  margin-top: 0;
+}
+
+.heading-item.h2 .accordion-header {
+  background-color: transparent;
+  color: inherit;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-left-color: transparent;
+}
+
+.heading-item.h3 .accordion-header {
+  background-color: transparent;
+  color: inherit;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-left-color: transparent;
+}
+
+.heading-item.h4 .accordion-header {
+  background-color: transparent;
+  color: inherit;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-left-color: transparent;
+}
+
+/* Task item styling - SEM INDENTAÇÃO - Fundo do VSCodium */
+.task-item .accordion-header {
+  padding: 2px 8px;
+}
+
+.task-item .accordion-header:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+/* Task state colors */
+.task-item[data-state="pending"] .task-text {
+  color: var(--vscode-foreground);
+}
+
+.task-item[data-state="done"] .task-text {
+  color: var(--vscode-descriptionForeground);
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.task-item[data-state="in-progress"] .task-text {
+  color: var(--vscode-foreground);
+}
+
+.task-item[data-state="blocked"] .task-text {
+  color: var(--vscode-foreground);
+}
+
+/* Accordion content (children) */
+.accordion-content {
+  margin: 0;
+}
+
+/* Indentação relativa de 6px por nível de aninhamento */
+.accordion-item[data-nest-level="0"] {
+  margin-left: 0;
+}
+
+.accordion-item[data-nest-level="1"] {
+  margin-left: 6px;
+}
+
+.accordion-item[data-nest-level="2"] {
+  margin-left: 12px;
+}
+
+.accordion-item[data-nest-level="3"] {
+  margin-left: 18px;
+}
+
+.accordion-item[data-nest-level="4"] {
+  margin-left: 24px;
+}
+
+.accordion-item[data-nest-level="5"] {
+  margin-left: 30px;
+}
+
+.accordion-item[data-nest-level="6"] {
+  margin-left: 36px;
+}
+
+.accordion-item[data-nest-level="7"] {
+  margin-left: 42px;
+}
+
+.accordion-item[data-nest-level="8"] {
+  margin-left: 48px;
+}
+
+.accordion-item[data-nest-level="9"] {
+  margin-left: 54px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.empty-state p {
+  margin: 8px 0;
+}
+
+small {
+  font-size: .9em;
+}
