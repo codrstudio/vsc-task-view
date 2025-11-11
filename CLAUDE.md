@@ -53,10 +53,11 @@ npm run package          # Build .vsix (uses TZ=UTC - see critical note below)
 - Uses `markdown-it` with `markdown-it-task-lists` plugin
 - Parses markdown tokens to extract headings (H2+) and task items
 - Builds hierarchical structure from flat token stream
-- Supports 4 task states:
+- Supports 5 task states:
   - `[ ]` → Pending
   - `[x]` → Done
-  - `[-]` → In Progress (custom)
+  - `[-]` → Incomplete (custom)
+  - `[>]` → In Progress (custom)
   - `[!]` → Blocked (custom)
 - Filters headings that don't contain tasks
 - Calculates aggregated status for parent headings
@@ -69,8 +70,16 @@ npm run package          # Build .vsix (uses TZ=UTC - see critical note below)
 
 **File Discovery (`src/fileDiscovery.ts`)**
 - Finds all `PLAN*.md` files in workspace
-- Excludes `node_modules`
+- Supports custom exclusion patterns from config
 - Sorts files alphabetically by filename
+
+**Configuration Manager (`src/configManager.ts`)**
+- Manages `.codr/task-planner.json` configuration file
+- Reads and writes configuration settings
+- Creates default config if not present
+- Key features:
+  - Exclusion patterns for file discovery
+  - JSON format with validation
 
 **Cache (`src/planCache.ts`)**
 - Implements mtime-based caching to avoid redundant parsing
@@ -79,22 +88,25 @@ npm run package          # Build .vsix (uses TZ=UTC - see critical note below)
 
 **Type Definitions (`src/types.ts`)**
 - Defines all interfaces and enums used across the extension
-- Key types: `HierarchyItem`, `ParsedPlan`, `TaskState`, `MessageType`
+- Key types: `HierarchyItem`, `ParsedPlan`, `TaskState`, `MessageType`, `TaskViewConfig`
 
 **Webview (`webview/main.js` & `webview/style.css`)**
 - Vanilla JavaScript (no framework)
 - Renders hierarchical task tree
-- Handles user interactions (click to navigate, file selection)
+- Handles user interactions (click to navigate, file selection, settings)
 - Uses VSCode theme variables for styling
 - Implements collapsible sections
+- Settings UI for configuration management
 
 ### Communication Flow
 
 1. **File Changes** → FileSystemWatcher → `refreshView()`
-2. **File Discovery** → `findPlanFiles()` → URI list
+2. **File Discovery** → `findPlanFiles(exclusions)` → URI list
 3. **File Loading** → Cache check → `parsePlan()` → `ParsedPlan`
 4. **Send to Webview** → `postMessage(UpdatePlan)` → Render UI
 5. **User Click** → `postMessage(NavigateToLine)` → Open file at line
+6. **Settings** → `postMessage(OpenSettings)` → Show settings UI
+7. **Save Config** → `postMessage(SaveConfig)` → Update config and refresh
 
 ### Data Flow
 
@@ -149,9 +161,36 @@ User interactions → Navigation
 ```markdown
 - [ ] Pending task
 - [x] Completed task
-- [-] In-progress task
+- [-] Incomplete task
+- [>] In-progress task
 - [!] Blocked task
 ```
+
+### Configuration File (`.codr/task-planner.json`)
+The extension uses a configuration file to control its behavior:
+
+**Location:** `.codr/task-planner.json` in workspace root
+
+**Structure:**
+```json
+{
+  "exclusions": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/dist/**"
+  ]
+}
+```
+
+**Features:**
+- Exclusion patterns use glob syntax (e.g., `**/folder/**`, `**/*.tmp.md`)
+- File is created automatically with defaults on first run
+- Changes take effect immediately on save
+- Accessible via settings icon (⚙) in webview
+
+**Default Exclusions:**
+- `**/node_modules/**`
+- `**/.git/**`
 
 ### Output Channel Logging
 - Extension uses "Plan Monitor" output channel extensively
@@ -167,9 +206,10 @@ User interactions → Navigation
 
 ### Adding New Task State
 1. Add enum value to `TaskState` in `types.ts`
-2. Update regex/detection logic in `planParser.ts` (around line 116-123)
+2. Update regex/detection logic in `planParser.ts` (around line 116-125)
 3. Add icon/styling in `webview/style.css`
-4. Update state counting logic (around line 196-201)
+4. Update state counting logic (around line 195-205)
+5. Update webview JavaScript in `webview/main.js` to handle the new state in badges and checkbox rendering
 
 ### Changing File Pattern
 1. Update pattern in `extension.ts` FileSystemWatcher (line 48)

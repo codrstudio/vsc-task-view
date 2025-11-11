@@ -46,3 +46,6 @@ coverage/
 
 # Build artifacts
 *.js.map
+
+# User configuration
+.codr/task-planner.json

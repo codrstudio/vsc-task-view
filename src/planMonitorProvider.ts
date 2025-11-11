@@ -3,7 +3,8 @@ import * as fs from 'fs/promises';
 import { parsePlan } from './planParser';
 import { PlanCache } from './planCache';
 import { findPlanFiles, getWorkspaceRelativePath } from './fileDiscovery';
-import { MessageType, NavigateMessage, UpdateMessage } from './types';
+import { MessageType, NavigateMessage, UpdateMessage, TaskViewConfig } from './types';
+import { ConfigManager } from './configManager';
 
 /**
  * WebviewViewProvider for the Plan Monitor sidebar panel
@@ -21,10 +22,12 @@ export class PlanMonitorProvider implements vscode.WebviewViewProvider {
   private readonly _extensionUri: vscode.Uri;
   private readonly _outputChannel: vscode.OutputChannel;
   private readonly _cache: PlanCache;
+  private _configManager?: ConfigManager;
 
   private _planFiles: vscode.Uri[] = [];
   private _currentFile?: vscode.Uri;
   private _isInitialized = false;
+  private _currentConfig?: TaskViewConfig;
 
   constructor(
     extensionUri: vscode.Uri,
@@ -105,6 +108,14 @@ export class PlanMonitorProvider implements vscode.WebviewViewProvider {
     try {
       this._outputChannel.appendLine('[PlanMonitor] Starting initialization...');
 
+      // Initialize config manager
+      const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      if (workspaceFolder) {
+        this._configManager = new ConfigManager(workspaceFolder);
+        this._currentConfig = await this._configManager.readConfig();
+        this._outputChannel.appendLine(`[PlanMonitor] Config loaded: ${this._currentConfig.exclusions.length} exclusions`);
+      }
+
       // Show loading state
       this._postMessage({
         type: 'loading',
@@ -157,7 +168,10 @@ export class PlanMonitorProvider implements vscode.WebviewViewProvider {
       }
 
       this._outputChannel.appendLine(`[PlanMonitor] Searching in: ${workspaceFolder.uri.fsPath}`);
-      this._planFiles = await findPlanFiles(workspaceFolder);
+
+      // Pass exclusions from config to file discovery
+      const exclusions = this._currentConfig?.exclusions || [];
+      this._planFiles = await findPlanFiles(workspaceFolder, exclusions);
 
       // Log each found file
       this._planFiles.forEach((file, index) => {
@@ -255,6 +269,14 @@ export class PlanMonitorProvider implements vscode.WebviewViewProvider {
           await this._loadPlan(fileUri);
           break;
 
+        case MessageType.OpenSettings:
+          await this._openSettings();
+          break;
+
+        case MessageType.SaveConfig:
+          await this._saveConfig(message.config);
+          break;
+
         default:
           this._outputChannel.appendLine(`[PlanMonitor] Unknown message type: ${message.type}`);
       }
@@ -284,6 +306,60 @@ export class PlanMonitorProvider implements vscode.WebviewViewProvider {
       const errorMsg = error instanceof Error ? error.message : String(error);
       this._outputChannel.appendLine(`[PlanMonitor] ERROR navigating: ${errorMsg}`);
       vscode.window.showErrorMessage(`Failed to open file: ${errorMsg}`);
+    }
+  }
+
+  /**
+   * Open settings screen in webview
+   */
+  private async _openSettings(): Promise<void> {
+    try {
+      this._outputChannel.appendLine('[PlanMonitor] Opening settings');
+
+      // Reload config to ensure we have the latest
+      if (this._configManager) {
+        this._currentConfig = await this._configManager.readConfig();
+      }
+
+      // Send config to webview
+      this._postMessage({
+        type: MessageType.UpdateConfig,
+        config: this._currentConfig
+      });
+
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      this._outputChannel.appendLine(`[PlanMonitor] ERROR opening settings: ${errorMsg}`);
+      vscode.window.showErrorMessage(`Failed to open settings: ${errorMsg}`);
+    }
+  }
+
+  /**
+   * Save configuration and refresh view
+   */
+  private async _saveConfig(config: TaskViewConfig): Promise<void> {
+    try {
+      this._outputChannel.appendLine('[PlanMonitor] Saving configuration');
+
+      if (!this._configManager) {
+        throw new Error('Config manager not initialized');
+      }
+
+      // Save config to disk
+      await this._configManager.writeConfig(config);
+      this._currentConfig = config;
+
+      this._outputChannel.appendLine(`[PlanMonitor] Config saved: ${config.exclusions.length} exclusions`);
+
+      // Refresh view with new config
+      await this.refreshView();
+
+      vscode.window.showInformationMessage('Task View settings saved successfully');
+
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      this._outputChannel.appendLine(`[PlanMonitor] ERROR saving config: ${errorMsg}`);
+      vscode.window.showErrorMessage(`Failed to save settings: ${errorMsg}`);
     }
   }
 

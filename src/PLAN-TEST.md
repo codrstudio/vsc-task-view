@@ -2,7 +2,7 @@
 
 ## Testing Task States
 
-- [>] Pending task
+- [x] Pending task
 - [x] Done task
 
 ### Others

@@ -3,10 +3,12 @@ import * as vscode from 'vscode';
 /**
  * Finds all PLAN*.md files in the workspace
  * @param workspaceFolder The workspace folder to search in
+ * @param exclusions Additional patterns to exclude (from config)
  * @returns Promise resolving to array of file URIs sorted alphabetically
  */
 export async function findPlanFiles(
-  workspaceFolder?: vscode.WorkspaceFolder
+  workspaceFolder?: vscode.WorkspaceFolder,
+  exclusions: string[] = []
 ): Promise<vscode.Uri[]> {
   try {
     // If no workspace is open, return empty array
@@ -17,10 +19,15 @@ export async function findPlanFiles(
     // Use the provided folder or the first workspace folder
     const folder = workspaceFolder || vscode.workspace.workspaceFolders![0];
 
-    // Search for PLAN*.md files, excluding node_modules
+    // Combine default exclusions with user-provided ones
+    const excludePattern = exclusions.length > 0
+      ? `{${exclusions.join(',')}}`
+      : '**/node_modules/**';
+
+    // Search for PLAN*.md files with combined exclusions
     const files = await vscode.workspace.findFiles(
       new vscode.RelativePattern(folder, '**/PLAN*.md'),
-      '**/node_modules/**'
+      excludePattern
     );
 
     // Sort alphabetically by filename

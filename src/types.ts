@@ -2,7 +2,8 @@
 export enum TaskState {
   Pending = 'pending',      // [ ]
   Done = 'done',            // [x]
-  InProgress = 'in-progress', // [-]
+  Incomplete = 'incomplete', // [-]
+  InProgress = 'in-progress', // [>]
   Blocked = 'blocked'       // [!]
 }
 
@@ -16,7 +17,8 @@ export enum ItemType {
 export enum AggregatedStatus {
   Done = 'done',           // All children done
   Partial = 'partial',     // Some children done
-  Pending = 'pending'      // No children done
+  Pending = 'pending',     // No children done
+  InProgress = 'in-progress' // At least one child in progress
 }
 
 /** A single item in the hierarchy (heading or task) */
@@ -60,7 +62,10 @@ export interface CacheEntry {
 export enum MessageType {
   UpdatePlan = 'updatePlan',       // Extension → Webview: New plan data
   NavigateToLine = 'navigateToLine', // Webview → Extension: User clicked task
-  SelectFile = 'selectFile'        // Webview → Extension: User changed file
+  SelectFile = 'selectFile',       // Webview → Extension: User changed file
+  OpenSettings = 'openSettings',   // Webview → Extension: User clicked settings icon
+  UpdateConfig = 'updateConfig',   // Extension → Webview: Send current config
+  SaveConfig = 'saveConfig'        // Webview → Extension: Save config changes
 }
 
 export interface NavigateMessage {
@@ -78,3 +83,27 @@ export interface SelectMessage {
   type: MessageType.SelectFile;
   filePath: string;
 }
+
+export interface OpenSettingsMessage {
+  type: MessageType.OpenSettings;
+}
+
+export interface UpdateConfigMessage {
+  type: MessageType.UpdateConfig;
+  config: TaskViewConfig;
+}
+
+export interface SaveConfigMessage {
+  type: MessageType.SaveConfig;
+  config: TaskViewConfig;
+}
+
+/** Configuration structure for .codr/task-planner.json */
+export interface TaskViewConfig {
+  exclusions: string[];  // Array of folder paths and glob patterns to exclude
+}
+
+/** Default configuration */
+export const DEFAULT_CONFIG: TaskViewConfig = {
+  exclusions: ['**/node_modules/**', '**/.git/**']
+};

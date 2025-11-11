@@ -114,8 +114,11 @@ export function parsePlan(content: string, filePath: string): ParsedPlan {
           const fullText = contentToken.content;
 
           if (fullText.match(/^\[-\]/)) {
-            state = TaskState.InProgress;
+            state = TaskState.Incomplete;
             text = fullText.replace(/^\[-\]\s*/, '').trim();
+          } else if (fullText.match(/^\[>\]/)) {
+            state = TaskState.InProgress;
+            text = fullText.replace(/^\[>\]\s*/, '').trim();
           } else if (fullText.match(/^\[!\]/)) {
             state = TaskState.Blocked;
             text = fullText.replace(/^\[!\]\s*/, '').trim();
@@ -189,13 +192,14 @@ export function parsePlan(content: string, filePath: string): ParsedPlan {
   calculateAggregatedStatus(hierarchical);
 
   // Calculate statistics (count only tasks, not headings)
-  const counts = { pending: 0, done: 0, inProgress: 0, blocked: 0 };
+  const counts = { pending: 0, done: 0, incomplete: 0, inProgress: 0, blocked: 0 };
   const countTasks = (items: HierarchyItem[]) => {
     items.forEach(item => {
       // Only count tasks, not headings
       if (item.type === ItemType.Task && item.state) {
         if (item.state === TaskState.Pending) counts.pending++;
         else if (item.state === TaskState.Done) counts.done++;
+        else if (item.state === TaskState.Incomplete) counts.incomplete++;
         else if (item.state === TaskState.InProgress) counts.inProgress++;
         else if (item.state === TaskState.Blocked) counts.blocked++;
       }
@@ -327,15 +331,23 @@ function calculateAggregatedStatus(items: HierarchyItem[]): void {
       if (descendantTasks.length === 0) {
         item.aggregatedStatus = AggregatedStatus.Pending;
       } else {
-        const doneCount = descendantTasks.filter(t => t.state === TaskState.Done).length;
-        const totalCount = descendantTasks.length;
+        // Check if any descendant is in-progress (takes priority for visibility)
+        const hasInProgress = descendantTasks.some(t => t.state === TaskState.InProgress);
 
-        if (doneCount === totalCount) {
-          item.aggregatedStatus = AggregatedStatus.Done;
-        } else if (doneCount > 0) {
-          item.aggregatedStatus = AggregatedStatus.Partial;
+        if (hasInProgress) {
+          // If any descendant is in-progress, show this parent as in-progress too
+          item.aggregatedStatus = AggregatedStatus.InProgress;
         } else {
-          item.aggregatedStatus = AggregatedStatus.Pending;
+          const doneCount = descendantTasks.filter(t => t.state === TaskState.Done).length;
+          const totalCount = descendantTasks.length;
+
+          if (doneCount === totalCount) {
+            item.aggregatedStatus = AggregatedStatus.Done;
+          } else if (doneCount > 0) {
+            item.aggregatedStatus = AggregatedStatus.Partial;
+          } else {
+            item.aggregatedStatus = AggregatedStatus.Pending;
+          }
         }
       }
     }
