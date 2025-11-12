@@ -2,7 +2,7 @@
   "name": "task-planner",
   "displayName": "Task Planner",
   "description": "Visualize PLAN*.md checklist files in sidebar",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "publisher": "codr-studio",
   "license": "MIT",
   "repository": {

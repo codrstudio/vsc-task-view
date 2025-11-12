@@ -97,6 +97,7 @@ body {
 
 .file-selector-wrapper select {
   flex: 1;
+  min-width: 0;
   padding: 6px 8px;
   background-color: var(--vscode-dropdown-background);
   color: var(--vscode-dropdown-foreground);
